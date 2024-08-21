@@ -1,0 +1,96 @@
+
+// SPDX-License-Identifier: GPL-3.0
+pragma solidity >=0.7.0 <0.9.0;
+
+contract AdvancedTRC20 {
+    // Mapping of token balances
+    mapping (address => uint256) private _balances;
+
+    // Mapping of token allowances
+    mapping (address => mapping (address => uint256)) private _allowances;
+
+    // Token details
+    string private _name = "Advanced Token";
+    string private _symbol = "AT20";
+    uint8 private _decimals = 18;
+
+    // Event emitted when tokens are transferred
+    event Transfer(address indexed from, address indexed to, uint256 value);
+
+    // Event emitted when tokens are burned
+    event Burn(address indexed burner, uint256 amount);
+
+    // Event emitted when token allowance is updated
+    event Approval(address indexed owner, address indexed spender, uint256 value);
+
+    // Total supply of tokens
+    uint256 private _totalSupply = 1000000 * (10 ** uint256(_decimals));
+
+    // Constructor
+    constructor() {
+        _balances[msg.sender] = _totalSupply;
+        emit Transfer(address(0), msg.sender, _totalSupply);
+    }
+
+    // Function to transfer tokens
+    function transfer(address to, uint256 value) public {
+        require(_balances[msg.sender] >= value, "Insufficient balance");
+        _balances[msg.sender] -= value;
+        _balances[to] += value;
+        emit Transfer(msg.sender, to, value);
+    }
+
+    // Function to check token balance
+    function balanceOf(address owner) public view returns (uint256) {
+        return _balances[owner];
+    }
+
+    // Function to burn tokens
+    function burn(uint256 amount) public {
+        require(_balances[msg.sender] >= amount, "Insufficient balance");
+        _balances[msg.sender] -= amount;
+        _totalSupply -= amount;
+        emit Burn(msg.sender, amount);
+    }
+
+    // Function to transfer tokens from one address to another
+    function transferFrom(address from, address to, uint256 value) public {
+        require(_balances[from] >= value, "Insufficient balance");
+        require(_allowances[from][msg.sender] >= value, "Insufficient allowance");
+        _balances[from] -= value;
+        _balances[to] += value;
+        _allowances[from][msg.sender] -= value;
+        emit Transfer(from, to, value);
+    }
+
+    // Function to set token allowance
+    function approve(address spender, uint256 value) public {
+        _allowances[msg.sender][spender] = value;
+        emit Approval(msg.sender, spender, value);
+    }
+
+    // Function to check token allowance
+    function allowance(address owner, address spender) public view returns (uint256) {
+        return _allowances[owner][spender];
+    }
+
+    // Function to get token name
+    function name() public view returns (string memory) {
+        return _name;
+    }
+
+    // Function to get token symbol
+    function symbol() public view returns (string memory) {
+        return _symbol;
+    }
+
+    // Function to get token decimals
+    function decimals() public view returns (uint8) {
+        return _decimals;
+    }
+
+    // Function to get total supply
+    function totalSupply() public view returns (uint256) {
+        return _totalSupply;
+    }
+}
