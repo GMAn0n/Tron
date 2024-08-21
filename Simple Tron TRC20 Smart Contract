@@ -1,0 +1,50 @@
+// SPDX-License-Identifier: GPL-3.0
+pragma solidity >=0.7.0 <0.9.0;
+
+contract SimpleTRC20 {
+    // Mapping of token balances
+    mapping (address => uint256) public balances;
+
+    // Token details
+    string public constant name = "Simple TRC20";
+    string public constant symbol = "ST20";
+    uint8 public constant decimals = 18;
+
+    // Event emitted when tokens are transferred
+    event Transfer(address indexed from, address indexed to, uint256 value);
+
+    // Total supply of tokens
+    uint256 public totalSupply = 1000000 * (10 ** uint256(decimals));
+
+    // Constructor
+    constructor()  {
+        // Initialize token balance for the contract owner
+        balances[msg.sender] = totalSupply;
+    }
+
+    // Function to transfer tokens
+    function transfer(address to, uint256 value) public {
+        // Check if the sender has enough tokens
+        require(balances[msg.sender] >= value, "Insufficient balance");
+
+        // Use calldata to reduce gas costs
+        uint256 senderBalance = balances[msg.sender];
+        senderBalance -= value;
+        balances[msg.sender] = senderBalance;
+
+        // Use uint256 explicitly
+        uint256 recipientBalance = balances[to];
+        recipientBalance += value;
+        balances[to] = recipientBalance;
+
+        // Only emit the event when necessary
+        if (value > 0) {
+            emit Transfer(msg.sender, to, value);
+        }
+    }
+
+    // Function to check token balance
+    function balanceOf(address owner) public view returns (uint256) {
+        return balances[owner];
+    }
+}
